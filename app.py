@@ -136,6 +136,17 @@ def create_meal():
 
     return jsonify({"message": "Dados invalidos"}), 400
 
+# Read Meal
+@app.route('/meal/<string:meal_id>', methods=["GET"])
+@login_required
+def read_meal(meal_id):
+    meal = Meal.query.get(meal_id)
+
+    if meal:
+        return jsonify({"message": "Meal fetched successfully", "meal": meal.to_dict()})
+
+    return jsonify({"message": "Dados invalidos"}), 400
+
 # Fetch Meals
 @app.route('/meals', methods=["GET"])
 @login_required
@@ -160,6 +171,19 @@ def update_meal(meal_id):
         meal.inside_diet = data.get("inside_diet")
         db.session.commit()
         return jsonify({"message": "Meal updated successfully", "id": meal.id})
+
+    return jsonify({"message": "Dados invalidos"}), 400
+
+# Delete Meal
+@app.route('/meal/<string:meal_id>', methods=["DELETE"])
+@login_required
+def delete_meal(meal_id):
+    meal = Meal.query.get(meal_id)
+    
+    if meal:
+        db.session.delete(meal)
+        db.session.commit()
+        return jsonify({"message": "Meal deleted successfully"})
 
     return jsonify({"message": "Dados invalidos"}), 400
 

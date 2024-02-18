@@ -159,6 +159,51 @@ def test_create_meal():
         assert "message" in response_json
         assert "id" in response_json
 
+def test_read_meal():
+    user = {
+        "email": faker.email(),
+        "password": "testpassword"
+    }
+
+    response = requests.post(f"{BASE_URL}/user", json=user)
+        
+    login_data = {
+        "email": user["email"],
+        "password": "testpassword"
+    }
+
+    with requests.Session() as s:
+        response = s.post(f"{BASE_URL}/login", json=login_data)
+
+        data = {
+            "name": faker.sentence(),
+            "description": faker.text(),
+            "inside_diet": faker.boolean()
+        }
+
+        response = s.post(f"{BASE_URL}/meal", json=data)
+        response_json = response.json()
+        meal_id = response_json["id"]
+
+        time.sleep(1)
+
+        response = s.get(f"{BASE_URL}/meal/{meal_id}")
+        assert response.status_code == 200
+        response_json = response.json()
+        response_meal = response_json["meal"]
+
+        response_meal_id = response_meal["id"]
+        assert response_meal_id == meal_id
+
+        name = response_meal["name"]
+        assert name == data["name"]
+
+        description = response_meal["description"]
+        assert description == data["description"]
+
+        inside_diet = response_meal["inside_diet"]
+        assert inside_diet == data["inside_diet"]
+
 def test_fetch_meals():
     user = {
         "email": faker.email(),
@@ -238,3 +283,36 @@ def test_update_meal():
         assert "message" in response_json
         reponse_meal_id = response_json["id"]
         assert reponse_meal_id == meal_id
+
+def test_delete_meal():
+    user = {
+        "email": faker.email(),
+        "password": "testpassword"
+    }
+
+    response = requests.post(f"{BASE_URL}/user", json=user)
+        
+    login_data = {
+        "email": user["email"],
+        "password": "testpassword"
+    }
+
+    with requests.Session() as s:
+        response = s.post(f"{BASE_URL}/login", json=login_data)
+
+        data = {
+            "name": faker.sentence(),
+            "description": faker.text(),
+            "inside_diet": faker.boolean()
+        }
+
+        response = s.post(f"{BASE_URL}/meal", json=data)
+        response_json = response.json()
+        meal_id = response_json["id"]
+
+        time.sleep(1)
+
+        response = s.delete(f"{BASE_URL}/meal/{meal_id}")
+        assert response.status_code == 200
+        response_json = response.json()
+        assert "message" in response_json
